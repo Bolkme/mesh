@@ -8,11 +8,13 @@
 
 ```
 mesh/
-├── doc/           # 📚 学习笔记和文档
-│   └── README.md  # Meshtastic 基础知识
-├── scripts/       # 🛠️ 配置脚本和工具
-├── configs/       # ⚙️ 设备配置文件
-└── experiments/   # 🧪 实验记录
+├── doc/                      # 📚 学习笔记和文档
+│   ├── README.md             # Meshtastic 基础知识
+│   ├── 总体学习报告.md        # 完整学习报告
+│   └── 固件学习报告.md        # 固件开发详解
+├── scripts/                  # 🛠️ 配置脚本和工具
+├── configs/                  # ⚙️ 设备配置文件
+└── experiments/              # 🧪 实验记录
 ```
 
 ---
