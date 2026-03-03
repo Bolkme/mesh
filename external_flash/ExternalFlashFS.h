@@ -17,6 +17,8 @@
 
 #include "STM32_LittleFS.h"
 #include <SPI.h>
+#include "concurrency.h"
+#include "SPILock.h"
 
 // Default SPI Flash configuration
 // These can be overridden in variant.h or platformio.ini

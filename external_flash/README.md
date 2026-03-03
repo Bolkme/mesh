@@ -10,12 +10,14 @@
 |------|------|
 | `ExternalFlashFS.h` | 头文件 - 定义 ExternalFlashFS 类和 API |
 | `ExternalFlashFS.cpp` | 实现文件 - SPI Flash 驱动和 LittleFS 集成 |
+| `FSCommon_ExternalFlash.h` | 包装头文件 - 自动 SPI 锁，推荐方式使用 |
 
 ### 使用方法
 
 1. **复制文件到项目**
    ```bash
    cp external_flash/ExternalFlashFS.* your_project/src/
+   cp external_flash/FSCommon_ExternalFlash.h your_project/src/
    ```
 
 2. **在 platformio.ini 中启用**
@@ -27,11 +29,27 @@
    ```
 
 3. **在代码中包含**
+   
+   **方式 A：使用 FSCommon_ExternalFlash.h（推荐，自动 SPI 锁）**
    ```cpp
-   #include "ExternalFlashFS.h"
+   #include "FSCommon_ExternalFlash.h"
    
    void setup() {
-       ExternalFS.begin();
+       ExternalFS.begin();  // 或 ExternalFS_BeginSafe()
+       // 使用 FSCom 进行文件操作（自动加锁）
+   }
+   ```
+   
+   **方式 B：直接使用 ExternalFlashFS（需手动 SPI 锁）**
+   ```cpp
+   #include "ExternalFlashFS.h"
+   #include "SPILock.h"
+   
+   void setup() {
+       {
+           concurrency::LockGuard g(spiLock);
+           ExternalFS.begin();
+       }
        // 使用 ExternalFS 进行文件操作
    }
    ```

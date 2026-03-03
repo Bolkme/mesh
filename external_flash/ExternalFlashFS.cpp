@@ -92,6 +92,9 @@ bool ExternalFlashFS::begin(SPIClass &spi, uint8_t cs_pin, uint32_t frequency)
     pinMode(_csPin, OUTPUT);
     _deselect();
 
+    // Acquire SPI lock to prevent conflicts with other SPI devices (e.g., SX126x radio)
+    concurrency::LockGuard g(spiLock);
+
     _spi->begin();
     _spi->beginTransaction(SPISettings(frequency, MSBFIRST, SPI_MODE0));
 
@@ -184,6 +187,7 @@ void ExternalFlashFS::end(void)
 
 bool ExternalFlashFS::detectFlash(void)
 {
+    // Note: Caller should hold spiLock
     uint32_t jedecId = getFlashId();
 
     if (jedecId == 0 || jedecId == 0xFFFFFF) {
@@ -234,6 +238,7 @@ bool ExternalFlashFS::detectFlash(void)
 
 uint32_t ExternalFlashFS::getFlashId(void)
 {
+    // Note: Caller should hold spiLock or ensure exclusive SPI access
     _select();
     _spi->transfer(FLASH_CMD_JEDEC_ID);
 
@@ -254,6 +259,9 @@ bool ExternalFlashFS::eraseChip(void)
     }
 
     FLASH_DEBUG("Erasing entire flash chip...");
+
+    // Acquire SPI lock for exclusive access
+    concurrency::LockGuard g(spiLock);
 
     _spi->beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
 
@@ -285,6 +293,9 @@ void ExternalFlashFS::enterDeepPowerDown(void)
         return;
     }
 
+    // Acquire SPI lock
+    concurrency::LockGuard g(spiLock);
+
     _spi->beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
     _select();
     _spi->transfer(FLASH_CMD_POWER_DOWN);
@@ -299,6 +310,9 @@ void ExternalFlashFS::wakeFromDeepPowerDown(void)
     if (!_initialized) {
         return;
     }
+
+    // Acquire SPI lock
+    concurrency::LockGuard g(spiLock);
 
     _spi->beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
     _select();
@@ -378,6 +392,9 @@ void ExternalFlashFS::_writeStatusRegister(uint8_t status)
 
 // ------------------------------------------------------------------
 // LittleFS block device operations
+// Note: LittleFS calls these functions internally. The caller of 
+// LittleFS APIs (open, read, write, etc.) is responsible for 
+// acquiring spiLock. We document this requirement clearly.
 // ------------------------------------------------------------------
 
 int ExternalFlashFS::_block_init(const struct lfs_config *c)
@@ -396,6 +413,9 @@ int ExternalFlashFS::_block_read(const struct lfs_config *c, lfs_block_t block, 
     if (!flash->_initialized || !flash->_spi) {
         return LFS_ERR_IO;
     }
+
+    // IMPORTANT: Caller must hold spiLock before calling LittleFS functions
+    // This is handled by FSCommon.cpp which wraps all FS operations with spiLock
 
     uint32_t addr = block * c->block_size + off;
 
@@ -427,6 +447,7 @@ int ExternalFlashFS::_block_prog(const struct lfs_config *c, lfs_block_t block, 
         return LFS_ERR_IO;
     }
 
+    // IMPORTANT: Caller must hold spiLock before calling LittleFS functions
     uint32_t addr = block * c->block_size + off;
 
     flash->_spi->beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
@@ -463,6 +484,7 @@ int ExternalFlashFS::_block_erase(const struct lfs_config *c, lfs_block_t block)
         return LFS_ERR_IO;
     }
 
+    // IMPORTANT: Caller must hold spiLock before calling LittleFS functions
     uint32_t addr = block * c->block_size;
 
     flash->_spi->beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
