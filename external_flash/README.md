@@ -11,6 +11,8 @@
 | `ExternalFlashFS.h` | 头文件 - 定义 ExternalFlashFS 类和 API |
 | `ExternalFlashFS.cpp` | 实现文件 - SPI Flash 驱动和 LittleFS 集成 |
 | `FSCommon_ExternalFlash.h` | 包装头文件 - 自动 SPI 锁，推荐方式使用 |
+| `FlashManager.h` | **全局控制器** - 统一管理内部/外部 Flash |
+| `FlashManager.cpp` | 全局控制器实现 - 自动选择、切换、健康检查 |
 
 ### 使用方法
 
@@ -103,6 +105,8 @@
 
 ## 💡 示例代码
 
+### 基础用法
+
 ```cpp
 #include "ExternalFlashFS.h"
 
@@ -122,6 +126,76 @@ void setup() {
     String data = f.readString();
     Serial.println(data);
     f.close();
+}
+```
+
+### 使用全局控制器（推荐）
+
+```cpp
+#include "FlashManager.h"
+
+void setup() {
+    // 初始化 Flash 管理器（自动选择）
+    if (!FlashMgr.init(FlashType::AUTO)) {
+        Serial.println("Flash init failed!");
+        return;
+    }
+    
+    // 获取当前状态
+    FlashStatus status = FlashMgr.getStatus();
+    Serial.printf("Using: %s flash\n", 
+                  status.type == FlashType::EXTERNAL ? "External" : "Internal");
+    
+    // 获取活动文件系统
+    STM32_LittleFS* fs = FlashMgr.getActiveFS();
+    
+    // 使用文件系统
+    File f = fs->open("/data.txt", "w");
+    f.print("Managed by FlashManager");
+    f.close();
+    
+    // 运行时切换到外部 Flash
+    if (FlashMgr.isExternalAvailable()) {
+        FlashMgr.switchFlashType(FlashType::EXTERNAL);
+    }
+    
+    // 备份配置
+    FlashMgr.backupConfigToExternal();
+    
+    // 进入低功耗模式
+    FlashMgr.enterLowPower();
+}
+```
+
+### 高级用法
+
+```cpp
+#include "FlashManager.h"
+
+void setup() {
+    // 显式配置使用外部 Flash
+    FlashMgr.init(FlashType::EXTERNAL);
+    
+    // 定期检查健康状态
+    if (!FlashMgr.checkHealth()) {
+        Serial.println("Flash health check failed!");
+        // 尝试切换到内部 Flash
+        FlashMgr.switchFlashType(FlashType::INTERNAL);
+    }
+    
+    // 获取空间信息
+    size_t total = FlashMgr.getTotalSpace();
+    size_t free = FlashMgr.getFreeSpace();
+    Serial.printf("Flash: %u/%u bytes used\n", total - free, total);
+}
+
+void loop() {
+    // 空闲时进入低功耗
+    delay(1000);
+    FlashMgr.enterLowPower();
+    
+    // 需要访问时唤醒
+    FlashMgr.exitLowPower();
 }
 ```
 
