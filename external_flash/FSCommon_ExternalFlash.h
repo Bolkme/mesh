@@ -66,7 +66,21 @@ EXTERNAL_FLASH_LOG("Using External SPI Flash for filesystem with SPI locking");
 inline bool ExternalFS_BeginSafe()
 {
     concurrency::LockGuard g(spiLock);
-    return ExternalFS.begin();
+    // Use beginInternal to avoid double-locking
+    return ExternalFS.beginInternal(SPI, EXTERNAL_FLASH_CS, 10000000);
+}
+
+/**
+ * @brief Helper function to safely initialize ExternalFS with custom parameters and SPI lock
+ * @param spi SPI instance to use
+ * @param cs_pin Chip Select pin
+ * @param frequency SPI frequency in Hz
+ * @return true if mount successful, false otherwise
+ */
+inline bool ExternalFS_BeginSafeCustom(SPIClass &spi, uint8_t cs_pin, uint32_t frequency)
+{
+    concurrency::LockGuard g(spiLock);
+    return ExternalFS.beginInternal(spi, cs_pin, frequency);
 }
 
 /**
@@ -76,7 +90,7 @@ inline bool ExternalFS_BeginSafe()
 inline void ExternalFS_EndSafe()
 {
     concurrency::LockGuard g(spiLock);
-    ExternalFS.end();
+    ExternalFS.endInternal();
 }
 
 /**

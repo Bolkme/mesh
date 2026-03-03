@@ -60,7 +60,7 @@ class ExternalFlashFS : public STM32_LittleFS
     virtual ~ExternalFlashFS();
 
     /**
-     * @brief Initialize and mount the external flash filesystem
+     * @brief Initialize and mount the external flash filesystem (with SPI lock)
      * @param spi SPI instance to use (default: SPI)
      * @param cs_pin Chip Select pin (default: EXTERNAL_FLASH_CS)
      * @param frequency SPI frequency in Hz (default: 10MHz)
@@ -69,16 +69,30 @@ class ExternalFlashFS : public STM32_LittleFS
     bool begin(SPIClass &spi = SPI, uint8_t cs_pin = EXTERNAL_FLASH_CS, uint32_t frequency = 10000000);
     
     /**
-     * @brief Initialize and mount with custom lfs_config
+     * @brief Initialize and mount with custom lfs_config (with SPI lock)
      * @param cfg LittleFS configuration structure
      * @return true if mount successful, false otherwise
      */
     bool begin(struct lfs_config *cfg) override;
 
     /**
-     * @brief Unmount and cleanup external flash filesystem
+     * @brief Unmount and cleanup external flash filesystem (with SPI lock)
      */
     void end(void) override;
+
+    /**
+     * @brief Internal begin without SPI lock (for use when lock is already held)
+     * @param spi SPI instance to use
+     * @param cs_pin Chip Select pin
+     * @param frequency SPI frequency in Hz
+     * @return true if mount successful, false otherwise
+     */
+    bool beginInternal(SPIClass &spi, uint8_t cs_pin, uint32_t frequency);
+    
+    /**
+     * @brief Internal end without SPI lock (for use when lock is already held)
+     */
+    void endInternal(void);
 
     /**
      * @brief Check if external flash is connected and responsive

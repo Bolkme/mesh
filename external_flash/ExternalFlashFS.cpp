@@ -85,6 +85,14 @@ bool ExternalFlashFS::begin(SPIClass &spi, uint8_t cs_pin, uint32_t frequency)
         return _mounted;
     }
 
+    // Acquire SPI lock to prevent conflicts with other SPI devices (e.g., SX126x radio)
+    concurrency::LockGuard g(spiLock);
+    
+    return beginInternal(spi, cs_pin, frequency);
+}
+
+bool ExternalFlashFS::beginInternal(SPIClass &spi, uint8_t cs_pin, uint32_t frequency)
+{
     _spi = &spi;
     _csPin = cs_pin;
 
@@ -92,13 +100,10 @@ bool ExternalFlashFS::begin(SPIClass &spi, uint8_t cs_pin, uint32_t frequency)
     pinMode(_csPin, OUTPUT);
     _deselect();
 
-    // Acquire SPI lock to prevent conflicts with other SPI devices (e.g., SX126x radio)
-    concurrency::LockGuard g(spiLock);
-
     _spi->begin();
     _spi->beginTransaction(SPISettings(frequency, MSBFIRST, SPI_MODE0));
 
-    // Detect flash chip
+    // Detect flash chip (note: getFlashId does NOT acquire lock, caller must hold it)
     if (!detectFlash()) {
         FLASH_DEBUG("External flash chip not detected");
         _spi->endTransaction();
@@ -146,6 +151,9 @@ bool ExternalFlashFS::begin(SPIClass &spi, uint8_t cs_pin, uint32_t frequency)
 
 bool ExternalFlashFS::begin(struct lfs_config *cfg)
 {
+    // Acquire SPI lock
+    concurrency::LockGuard g(spiLock);
+
     if (cfg) {
         // Use provided configuration
         memcpy(&_lfs_cfg, cfg, sizeof(struct lfs_config));
@@ -156,10 +164,20 @@ bool ExternalFlashFS::begin(struct lfs_config *cfg)
         _lfs_cfg.context = this;
     }
 
+    // Note: STM32_LittleFS::begin() may call block device operations
+    // which will be protected by the lock we just acquired
     return STM32_LittleFS::begin(&_lfs_cfg);
 }
 
 void ExternalFlashFS::end(void)
+{
+    // Acquire SPI lock
+    concurrency::LockGuard g(spiLock);
+    
+    endInternal();
+}
+
+void ExternalFlashFS::endInternal(void)
 {
     if (_mounted) {
         STM32_LittleFS::end();

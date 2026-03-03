@@ -30,13 +30,18 @@
 
 3. **在代码中包含**
    
-   **方式 A：使用 FSCommon_ExternalFlash.h（推荐，自动 SPI 锁）**
+   **方式 A：使用 FSCommon_ExternalFlash.h（最推荐，自动 SPI 锁）**
    ```cpp
    #include "FSCommon_ExternalFlash.h"
    
    void setup() {
-       ExternalFS.begin();  // 或 ExternalFS_BeginSafe()
-       // 使用 FSCom 进行文件操作（自动加锁）
+       // 使用安全包装函数（自动加锁）
+       ExternalFS_BeginSafe();
+       
+       // 或使用 FSCom（由 FSCommon.cpp 函数自动加锁）
+       File f = FSCom.open("/test.txt", "w");
+       f.print("Hello");
+       f.close();
    }
    ```
    
@@ -50,7 +55,26 @@
            concurrency::LockGuard g(spiLock);
            ExternalFS.begin();
        }
-       // 使用 ExternalFS 进行文件操作
+       
+       // 文件操作也需要手动加锁
+       {
+           concurrency::LockGuard g(spiLock);
+           File f = ExternalFS.open("/test.txt", "w");
+           f.print("Hello");
+           f.close();
+       }
+   }
+   ```
+   
+   **方式 C：使用 FSCommon.cpp 包装函数（自动加锁）**
+   ```cpp
+   #include "FSCommon.h"  // 包含 FSCommon_ExternalFlash.h
+   
+   void setup() {
+       fsInit();  // 自动加锁
+       
+       // copyFile, listDir 等函数都自动加锁
+       copyFile("/src.txt", "/dst.txt");
    }
    ```
 
