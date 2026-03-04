@@ -14,22 +14,20 @@ mesh/
 │   │   ├── 总体学习报告.md       # 完整学习报告
 │   │   └── 固件学习报告.md       # 固件开发详解
 │   ├── source-code/             # 💻 源代码
-│   │   └── meshcore/            # (如有)
 │   └── external_flash/          # 🔌 外部刷写工具
 │
 ├── MeshCore/                    # 🔷 MeshCore 项目
-│   ├── doc/                     # 📚 研究报告 (9 份)
-│   │   ├── 00-index.md          # 索引
-│   │   ├── 01-overview.md       # 项目概述
-│   │   ├── 02-architecture.md   # 架构分析
-│   │   ├── 03-features.md       # 功能特性
-│   │   ├── 04-comparison.md     # 与 Meshtastic 对比
-│   │   ├── 05-usage.md          # 使用指南
-│   │   ├── 06-report.md         # 完整学习报告
-│   │   ├── 07-firmware-analysis.md ⭐ 固件源码解析
-│   │   └── 08-protocol-spec.md     ⭐ 协议详解
-│   └── source-code/             # 💻 官方源码
-│       └── meshcore/            # MeshCore 完整源码
+│   ├── doc/                     # 📚 研究报告 (9 份，已编号)
+│   │   ├── 01-索引与资源.md
+│   │   ├── 02-项目概述.md
+│   │   ├── 03-架构分析.md
+│   │   ├── 04-功能特性.md
+│   │   ├── 05-与 Meshtastic 对比.md
+│   │   ├── 06-使用指南.md
+│   │   ├── 07-完整学习报告.md
+│   │   ├── 08-固件源码解析.md ⭐
+│   │   └── 09-协议详解.md ⭐
+│   └── source-code/meshcore/    # 💻 官方源码
 │
 └── README.md                    # 本文件
 ```
@@ -59,7 +57,7 @@ mesh/
 
 - **定位**: 嵌入式轻量级路由协议
 - **特点**: 简洁高效、MIT 许可、开发者友好
-- **文档**: `MeshCore/doc/` (9 份研究报告)
+- **文档**: `MeshCore/doc/` (9 份研究报告，已编号)
 - **源码**: `MeshCore/source-code/meshcore/`
 
 ---
@@ -75,22 +73,29 @@ mesh/
 | 社区 | 大型 | 成长中 |
 | 推荐场景 | 个人使用/hobby | 商业/定制开发 |
 
-详细对比见 `MeshCore/doc/04-comparison.md`
+详细对比见 `MeshCore/doc/05-与 Meshtastic 对比.md`
 
 ---
 
-## 📋 MeshCore 研究文档
+## 📋 MeshCore 研究文档（按阅读顺序）
 
-| 编号 | 文档 | 内容 |
-|------|------|------|
-| 01 | overview.md | 项目概述、使命、应用场景 |
-| 02 | architecture.md | 架构分析、组件、协议 |
-| 03 | features.md | 功能特性、配置、安全 |
-| 04 | comparison.md | 与 Meshtastic 详细对比 |
-| 05 | usage.md | 使用指南、快速开始 |
-| 06 | report.md | 完整学习报告总结 |
-| **07** | **firmware-analysis.md** | **固件源码深度解析** ⭐ |
-| **08** | **protocol-spec.md** | **协议详解规范** ⭐ |
+| 序号 | 文档 | 内容 | 适合人群 |
+|------|------|------|----------|
+| 01 | 01-索引与资源.md | 索引、资源链接、阅读路线 | 所有人 📍 |
+| 02 | 02-项目概述.md | 项目概述、使命、应用场景 | 入门 📖 |
+| 03 | 03-架构分析.md | 架构分析、组件、协议 | 技术 🏗️ |
+| 04 | 04-功能特性.md | 功能特性、配置、安全 | 技术 ⚙️ |
+| 05 | 05-与 Meshtastic 对比.md | 与 Meshtastic 详细对比 | 选型 🆚 |
+| 06 | 06-使用指南.md | 使用指南、快速开始 | 上手 🚀 |
+| 07 | 07-完整学习报告.md | 完整学习报告总结 | 总结 📋 |
+| **08** | **08-固件源码解析.md** | **固件源码深度解析** | 开发者 💻⭐ |
+| **09** | **09-协议详解.md** | **协议详解规范** | 开发者 📡⭐ |
+
+### 推荐阅读路线
+
+**入门路线**: 01 → 02 → 03 → 04 → 06  
+**对比选型**: 01 → 05 → 07  
+**深度研究**: 01 → 02-07 → 08 → 09
 
 ---
 
@@ -105,15 +110,15 @@ mesh/
 
 ### MeshCore
 
-1. 阅读 `MeshCore/doc/01-overview.md` 了解项目
+1. 阅读 `MeshCore/doc/01-索引与资源.md` 开始
 2. 访问 https://flasher.meshcore.co.uk 刷写固件
 3. 使用客户端应用连接
 
 ### 开发者
 
 1. 查看 `MeshCore/source-code/meshcore/` 源码
-2. 阅读 `MeshCore/doc/07-firmware-analysis.md` 了解架构
-3. 参考 `MeshCore/doc/08-protocol-spec.md` 了解协议
+2. 阅读 `MeshCore/doc/08-固件源码解析.md` 了解架构
+3. 参考 `MeshCore/doc/09-协议详解.md` 了解协议
 4. 使用 PlatformIO 编译自定义固件
 
 ---
