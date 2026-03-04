@@ -1,1 +1,4 @@
-firmware/meshcore-source/
+# Git 忽略文件
+
+# 嵌套的 Git 仓库
+MeshCore/source-code/meshcore/
