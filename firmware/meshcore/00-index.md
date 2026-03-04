@@ -1,0 +1,111 @@
+# MeshCore 研究索引
+
+## 📚 项目资源
+
+- **官网**: https://meshcore.co.uk/
+- **GitHub**: https://github.com/meshcore-dev/MeshCore
+- **描述**: A new lightweight, hybrid routing mesh protocol for packet radios
+
+## 📁 研究文件结构
+
+| 文件 | 内容 | 状态 |
+|------|------|------|
+| 00-index.md | 本索引文件 | ✅ |
+| 01-overview.md | 项目概述 | ✅ |
+| 02-architecture.md | 架构分析 | ✅ |
+| 03-features.md | 功能特性 | ✅ |
+| 04-comparison.md | 与 Meshtastic 对比 | ✅ |
+| 05-usage.md | 使用指南 | ✅ |
+| 06-report.md | 完整学习报告 | ✅ |
+| **07-firmware-analysis.md** | **固件源码解析** | ✅ |
+| **08-protocol-spec.md** | **协议详解** | ✅ |
+
+## 📂 固件源码
+
+```
+firmware/meshcore-source/    # 已克隆完整源码
+├── src/                     # 核心源代码
+│   ├── Mesh.h / Mesh.cpp
+│   ├── Dispatcher.h / Dispatcher.cpp
+│   ├── Packet.h / Packet.cpp
+│   ├── Identity.h / Identity.cpp
+│   └── Utils.h / Utils.cpp
+├── examples/                # 示例应用
+│   ├── companion_radio/
+│   ├── kiss_modem/
+│   ├── simple_repeater/
+│   ├── simple_room_server/
+│   ├── simple_secure_chat/
+│   └── simple_sensor/
+├── docs/                    # 官方技术文档
+│   ├── packet_format.md
+│   ├── payloads.md
+│   ├── companion_protocol.md
+│   ├── kiss_modem_protocol.md
+│   └── ...
+├── variants/                # 硬件配置 (69 种)
+└── platformio.ini           # 构建配置
+```
+
+## 🔍 核心发现
+
+### 数据包格式
+
+```
+[header][transport_codes(可选)][path_length][path][payload]
+ 1 byte     4 bytes             1 byte      ≤64     ≤184 bytes
+```
+
+### 路由类型
+
+- **FLOOD** (`0x01`): 泛洪广播
+- **DIRECT** (`0x02`): 直接路由
+- **TRANSPORT_FLOOD** (`0x00`): 区域泛洪
+- **TRANSPORT_DIRECT** (`0x03`): 区域直接
+
+### 载荷类型
+
+- `0x02` TXT_MSG: 文本消息
+- `0x04` ADVERT: 节点广告
+- `0x08` PATH: 返回路径
+- `0x09` TRACE: 路径追踪
+- `0x0B` CONTROL: 控制数据
+
+### 安全机制
+
+- **加密**: ECDH 共享密钥
+- **签名**: Ed25519
+- **MAC**: 2 字节消息认证码
+- **ACL**: 访问控制列表（传感器节点）
+
+## 🔗 与 Meshtastic 的区别
+
+| 维度 | MeshCore | Meshtastic |
+|------|----------|------------|
+| 定位 | 嵌入式开发者 | 终端用户 |
+| 代码量 | ~2000 行核心 | ~50000+ 行 |
+| 内存管理 | 静态池 | 动态分配 |
+| 许可 | MIT | GPL-3.0 |
+| 复杂度 | 低 | 中 |
+
+详细对比见 `04-comparison.md`
+
+## 📅 研究时间线
+
+- **2026-03-04**: 创建研究文件夹
+- **2026-03-04**: 完成基础研究报告 (01-06)
+- **2026-03-04**: 克隆固件源码
+- **2026-03-04**: 完成固件源码解析 (07)
+- **2026-03-04**: 完成协议详解整理 (08)
+
+## 🚀 下一步
+
+- [ ] 编译固件并测试
+- [ ] 实际部署节点
+- [ ] 性能测试对比
+- [ ] 补充实验数据
+
+---
+
+*本文件夹与 meshtastic 研究完全隔离，独立存档*  
+*更新时间：2026-03-04*
